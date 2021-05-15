@@ -28,7 +28,7 @@ be connected with OR.}
 If character vector contains more than one element, elements will
 be connected with OR.}
 
-\item{media_id}{Optional media ids (see code{\link{search_media()}}) passed to the
+\item{media_id}{Optional media ids (see \code{\link{search_media}}) passed to the
 \href{https://mediacloud.org/support/query-guide/}{Solr query}.
 If vector contains more than one element, elements will
 be connected with OR.}

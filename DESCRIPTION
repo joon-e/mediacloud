@@ -1,5 +1,5 @@
 Package: mediacloud
-Title: What the Package Does (One Line, Title Case)
+Title: MediaCloud API Wrapper
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "julian",
@@ -7,7 +7,11 @@ Authors@R:
            role = c("aut", "cre"),
            email = "julian.unkel@gmail.com",
            comment = c(ORCID = "0000-0001-9568-7041"))
-Description: What the package does (one paragraph).
+Description: A simple API wrapper for the MediaCloud API. Curenntly supports
+  searching for media outlets and stories, getting word matrices for stories,
+  getting single stories, and checking rate limits. Calls to the stories and
+  word matrices endpoints have simplified interface for constructing the
+  necessary Solr queries. All results follow tidy data principles.
 License: MIT + file LICENSE
 Suggests: 
     testthat (>= 3.0.0)
@@ -20,6 +24,12 @@ Imports:
     httr,
     stringr,
     magrittr,
-    glue
+    glue,
+    dplyr,
+    lubridate,
+    purrr,
+    tibble,
+    tidyr,
+    rlang
 URL: https://github.com/joon-e/mediacloud
 BugReports: https://github.com/joon-e/mediacloud/issues
