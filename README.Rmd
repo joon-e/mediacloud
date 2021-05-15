@@ -16,41 +16,60 @@ knitr::opts_chunk$set(
 # mediacloud
 
 <!-- badges: start -->
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![CRAN status](https://www.r-pkg.org/badges/version/mediacloud)](https://CRAN.R-project.org/package=mediacloud)
 <!-- badges: end -->
 
-The goal of mediacloud is to ...
+R wrapper package for the [MediaCloud](https://mediacloud.org/) API.
 
 ## Installation
 
-You can install the released version of mediacloud from [CRAN](https://CRAN.R-project.org) with:
+You can install the development version of mediacloud from GitHub with:
 
-``` r
-install.packages("mediacloud")
+```{r eval=FALSE}
+#install.packages("remotes")
+remotes::install_github("joon-e/mediacloud")
 ```
 
-## Example
 
-This is a basic example which shows you how to solve a common problem:
+## Usage
 
-```{r example}
+```{r}
 library(mediacloud)
-## basic example code
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+### Authentication
+
+Register for a MediaCloud account [here](https://explorer.mediacloud.org/#/user/signup). The API key can be passed directly to functions with the `key` argument. If no key is provided, then the package will look for one in the environment variable `MEDIACLOUD_API_KEY`. Thus, the easiest way to authenticate is to store your key using `Sys.setenv()`:
+
+```{r eval=FALSE}
+Sys.setenv(MEDIACLOUD_API_KEY = "YOUR_KEY_GOES_HERE")
+```
+
+### Search media
+
+Search for media outlets with `search_media()`:
 
 ```{r cars}
-summary(cars)
+search_media(tag = "Germany___National", n = 10)
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. You could also use GitHub Actions to re-render `README.Rmd` every time you push. An example workflow can be found here: <https://github.com/r-lib/actions/tree/master/examples>.
+### Search stories
 
-You can also embed plots, for example:
+Search for stories with `search_media()`, for example by full `text`, `title`, and/or `media_id`, and filter stories published after `after_date` and/or before `before_date`:
 
-```{r pressure, echo = FALSE}
-plot(pressure)
+```{r}
+stories <- search_stories(title = "dogecoin", media_id = c(19831, 38697), after_date = "2021-05-01")
+stories
 ```
+### Get word matrices
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+Get Tidytext-style word matrices associated with those stories:
+
+```{r}
+wm <- get_word_matrices(stories_id = stories$stories_id)
+wm
+```
+These can be tranformed to Quanteda-style DFMs using `tidytext::cast_dfm()`:
+
+```{r}
+tidytext::cast_dfm(wm, stories_id, word_stem, word_counts)
+```
