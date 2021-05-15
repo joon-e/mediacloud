@@ -1,7 +1,15 @@
-# Main querying functions
-
-#' Construct Request URL
+#' Construct request URL
 #'
+#' Construct the URL for the API call
+#'
+#' @param endpoint MediaCloud API endpoint (without /api/v2)
+#' @param path Additional path to add to the endpoint
+#' @param parameters A named list with query parameters
+#' @param key MediaCloud API key
+#'
+#' @return A string with the call URL
+#'
+#' @keywords internal
 create_mc_url <- function(endpoint,
                           path = NULL,
                           parameters = NULL,
@@ -34,6 +42,11 @@ create_mc_url <- function(endpoint,
 
 #' Call API
 #'
+#' Call API, check for status code and return content
+#'
+#' @param url A URL string built with create_mc_url()
+#'
+#' @return JSON content object
 call_mc_api <- function(url) {
 
     # GET
@@ -53,7 +66,13 @@ call_mc_api <- function(url) {
 #' Solr query
 #'
 #' Build Solr query from named arguments
-parse_solr_query <- function(...) {
+#'
+#' @param ... Named arguments to build Solr query from
+#'
+#' @return String with Solr query
+#'
+#' @keywords internal
+build_solr_query <- function(...) {
     query_terms <- list(...)
 
     # Remove NULLs
@@ -78,6 +97,15 @@ parse_solr_query <- function(...) {
 }
 
 #' Check rate limit
+#'
+#' Check your current rate limit
+#'
+#' @export
+#'
+#' @param key MediaCloud API key. Will be read from environment
+#'   variable 'MEDIACLOUD_API_KEY' if set to `NULL` (default).
+#'
+#' @return A tibble with information about the current rate limits.
 check_rate_limit <- function(key = NULL) {
 
     # Define endpoint

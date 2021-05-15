@@ -6,18 +6,74 @@
 \usage{
 search_stories(
   text = NULL,
+  title = NULL,
   media_id = NULL,
   stories_id = NULL,
-  publish_year = NULL,
-  publish_month = NULL,
-  publish_day = NULL,
-  publish_date = NULL,
+  after_date = NULL,
+  before_date = NULL,
   n = 20,
   last_processed_stories_id = NULL,
   key = NULL,
   tibble = TRUE
 )
 }
+\arguments{
+\item{text}{Optional character vector for full text search passed to the
+\href{https://mediacloud.org/support/query-guide/}{Solr query}.
+If character vector contains more than one element, elements will
+be connected with OR.}
+
+\item{title}{Optional character vector for title search passed to the
+\href{https://mediacloud.org/support/query-guide/}{Solr query}.
+If character vector contains more than one element, elements will
+be connected with OR.}
+
+\item{media_id}{Optional media ids (see code{\link{search_media()}}) passed to the
+\href{https://mediacloud.org/support/query-guide/}{Solr query}.
+If vector contains more than one element, elements will
+be connected with OR.}
+
+\item{stories_id}{Optional stories ids passed to the
+\href{https://mediacloud.org/support/query-guide/}{Solr query}.
+If vector contains more than one element, elements will
+be connected with OR.}
+
+\item{after_date}{Limit results to stories published after this date. Should
+be a date string that can be interpreted as a \code{POSIXct} object, e.g.,
+'2021-01-01' or '2021-12-24 09:00:00'. Note that '00:00:00' will be
+added if only passing a date.}
+
+\item{before_date}{Limit results to stories published before this date. Should
+be a date string that can be interpreted as a \code{POSIXct} object, e.g.,
+'2021-01-01' or '2021-12-24 09:00:00'. Note that '00:00:00' will be
+added if only passing a date.}
+
+\item{n}{Number of stories to search. Should be <= 1000.}
+
+\item{last_processed_stories_id}{Limit results to stories with a
+\code{processed_stories_id} greater than this value. Useful for paginating
+over results.}
+
+\item{key}{MediaCloud API key. Will be read from environment
+variable 'MEDIACLOUD_API_KEY' if set to \code{NULL} (default).}
+
+\item{tibble}{Logical indicating whether result should be returned as
+a tibble. Default to \code{TRUE}. If set to \code{FALSE}, the unedited content
+of the HTTP response will be returned instead.}
+}
+\value{
+A tibble containing information about the stories.
+}
 \description{
-Search stories
+Search for stories with various parameters. Multiple parameters
+will be connected with AND in the call.
+}
+\examples{
+\dontrun{
+search_stories(text = c("football", "soccer"))
+search_stories(text = "football NOT soccer")
+search_stories(title = "football", media_id = c(1, 2))
+search_stories("football", after_date = "2020-01-01", before_date = "2020-01-02", media_id = 1)
+}
+
 }

@@ -6,18 +6,75 @@
 \usage{
 get_word_matrices(
   text = NULL,
+  title = NULL,
   media_id = NULL,
   stories_id = NULL,
-  publish_year = NULL,
-  publish_month = NULL,
-  publish_day = NULL,
-  publish_date = NULL,
+  after_date = NULL,
+  before_date = NULL,
   n = 20,
   stopword_length = NULL,
   key = NULL,
   tibble = TRUE
 )
 }
+\arguments{
+\item{text}{Optional character vector for full text search passed to the
+\href{https://mediacloud.org/support/query-guide/}{Solr query}.
+If character vector contains more than one element, elements will
+be connected with OR.}
+
+\item{title}{Optional character vector for title search passed to the
+\href{https://mediacloud.org/support/query-guide/}{Solr query}.
+If character vector contains more than one element, elements will
+be connected with OR.}
+
+\item{media_id}{Optional media ids (see code{\link{search_media()}}) passed to the
+\href{https://mediacloud.org/support/query-guide/}{Solr query}.
+If vector contains more than one element, elements will
+be connected with OR.}
+
+\item{stories_id}{Optional stories ids passed to the
+\href{https://mediacloud.org/support/query-guide/}{Solr query}.
+If vector contains more than one element, elements will
+be connected with OR.}
+
+\item{after_date}{Limit results to stories published after this date. Should
+be a date string that can be interpreted as a \code{POSIXct} object, e.g.,
+'2021-01-01' or '2021-12-24 09:00:00'. Note that '00:00:00' will be
+added if only passing a date.}
+
+\item{before_date}{Limit results to stories published before this date. Should
+be a date string that can be interpreted as a \code{POSIXct} object, e.g.,
+'2021-01-01' or '2021-12-24 09:00:00'. Note that '00:00:00' will be
+added if only passing a date.}
+
+\item{n}{Number of stories to search. Should be <= 1000.}
+
+\item{stopword_length}{if set to 'tiny', 'short', or 'long',
+eliminate stop word list of that length}
+
+\item{key}{MediaCloud API key. Will be read from environment
+variable 'MEDIACLOUD_API_KEY' if set to \code{NULL} (default).}
+
+\item{tibble}{Logical indicating whether result should be returned as
+a tibble. Default to \code{TRUE}. If set to \code{FALSE}, the unedited content
+of the HTTP response will be returned instead.}
+}
+\value{
+A tibble with a
+\href{https://cran.r-project.org/web/packages/tidytext/vignettes/tidytext.html}{Tidytext-style}
+word matrix with one word per row and columns indicating
+the \code{stories_id}, the \code{word_count}, the \code{word_stem}, and the most common
+\code{full_word} associated with said stem. Use \code{\link[tidytext]{cast_dfm}}
+to transform into a  \href{https://quanteda.io/}{Quanteda} DFM.
+}
 \description{
-Get word matrices
+Get word matrices for stories.
+}
+\examples{
+\dontrun{
+get_word_matrices(stories_id = c(1484325770, 24835747, 24840330))
+get_word_matrices("football", after_date = "2020-01-01", before_date = "2020-01-02", media_id = 1)
+}
+
 }

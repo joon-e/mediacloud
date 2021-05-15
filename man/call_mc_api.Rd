@@ -6,6 +6,12 @@
 \usage{
 call_mc_api(url)
 }
+\arguments{
+\item{url}{A URL string built with create_mc_url()}
+}
+\value{
+JSON content object
+}
 \description{
-Call API
+Call API, check for status code and return content
 }

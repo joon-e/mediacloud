@@ -2,7 +2,7 @@
 % Please edit documentation in R/mc.R
 \name{create_mc_url}
 \alias{create_mc_url}
-\title{Construct Request URL}
+\title{Construct request URL}
 \usage{
 create_mc_url(
   endpoint,
@@ -11,6 +11,19 @@ create_mc_url(
   key = Sys.getenv("MEDIACLOUD_API_KEY")
 )
 }
-\description{
-Construct Request URL
+\arguments{
+\item{endpoint}{MediaCloud API endpoint (without /api/v2)}
+
+\item{path}{Additional path to add to the endpoint}
+
+\item{parameters}{A named list with query parameters}
+
+\item{key}{MediaCloud API key}
 }
+\value{
+A string with the call URL
+}
+\description{
+Construct the URL for the API call
+}
+\keyword{internal}

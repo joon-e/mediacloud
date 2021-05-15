@@ -4,8 +4,28 @@
 \alias{get_single_story}
 \title{Get single story}
 \usage{
-get_single_story(story_id, key = NULL, tibble = TRUE)
+get_single_story(stories_id, key = NULL, tibble = TRUE)
+}
+\arguments{
+\item{stories_id}{The MediaCloud story id}
+
+\item{key}{MediaCloud API key. Will be read from environment
+variable 'MEDIACLOUD_API_KEY' if set to \code{NULL} (default).}
+
+\item{tibble}{Logical indicating whether result should be returned as
+a tibble. Default to \code{TRUE}. If set to \code{FALSE}, the unedited content
+of the HTTP response will be returned instead.}
+}
+\value{
+A tibble containing information about the story.
 }
 \description{
-Get single story
+Get information about a single MediaCloud story.
+}
+\examples{
+
+\dontrun{
+get_single_story(27456565)
+}
+
 }

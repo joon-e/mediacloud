@@ -6,6 +6,30 @@
 \usage{
 search_media(name = NULL, tag = NULL, n = 20, key = NULL, tibble = TRUE)
 }
+\arguments{
+\item{name}{Media name to search for.}
+
+\item{tag}{MediaCloud tag to search for.}
+
+\item{n}{Maximum number of results to return.}
+
+\item{key}{MediaCloud API key. Will be read from environment
+variable 'MEDIACLOUD_API_KEY' if set to \code{NULL} (default).}
+
+\item{tibble}{Logical indicating whether result should be returned as
+a tibble. Default to \code{TRUE}. If set to \code{FALSE}, the unedited content
+of the HTTP response will be returned instead.}
+}
+\value{
+A tibble containing information about found media outlets.
+}
 \description{
-Search media
+Search for media outlets by name and/or tag.
+}
+\examples{
+\dontrun{
+search_media(name = "New York")
+search_media(tag = "Germany___National")
+}
+
 }

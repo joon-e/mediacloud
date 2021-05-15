@@ -1,4 +1,25 @@
 #' Search media
+#'
+#' Search for media outlets by name and/or tag.
+#'
+#' @export
+#'
+#' @param name Media name to search for.
+#' @param tag MediaCloud tag to search for.
+#' @param n Maximum number of results to return.
+#' @param key MediaCloud API key. Will be read from environment
+#'   variable 'MEDIACLOUD_API_KEY' if set to `NULL` (default).
+#' @param tibble Logical indicating whether result should be returned as
+#'   a tibble. Default to `TRUE`. If set to `FALSE`, the unedited content
+#'   of the HTTP response will be returned instead.
+#'
+#' @examples
+#' \dontrun{
+#' search_media(name = "New York")
+#' search_media(tag = "Germany___National")
+#' }
+#'
+#' @return A tibble containing information about found media outlets.
 search_media <- function(name = NULL, tag = NULL, n = 20, key = NULL, tibble = TRUE) {
 
     # Check
@@ -12,7 +33,7 @@ search_media <- function(name = NULL, tag = NULL, n = 20, key = NULL, tibble = T
 
     # Parameters
     search_params <- list(name = name,
-                          tag = tag,
+                          tag_name = tag,
                           rows = n)
 
     # Create URL

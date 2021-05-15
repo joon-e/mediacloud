@@ -1,5 +1,24 @@
 #' Get single story
-get_single_story <- function(story_id, key = NULL, tibble = TRUE) {
+#'
+#' Get information about a single MediaCloud story.
+#'
+#' @export
+#'
+#' @param stories_id The MediaCloud story id
+#' @param key MediaCloud API key. Will be read from environment
+#'   variable 'MEDIACLOUD_API_KEY' if set to `NULL` (default).
+#' @param tibble Logical indicating whether result should be returned as
+#'   a tibble. Default to `TRUE`. If set to `FALSE`, the unedited content
+#'   of the HTTP response will be returned instead.
+#'
+#' @examples
+#'
+#' \dontrun{
+#' get_single_story(27456565)
+#' }
+#'
+#' @return A tibble containing information about the story.
+get_single_story <- function(stories_id, key = NULL, tibble = TRUE) {
 
     # Define endpoint
     ep <- "stories_public/single"
@@ -8,7 +27,7 @@ get_single_story <- function(story_id, key = NULL, tibble = TRUE) {
     if (is.null(key)) key <- Sys.getenv("MEDIACLOUD_API_KEY")
 
     # Create URL
-    url <- create_mc_url(ep, path = story_id, key = key)
+    url <- create_mc_url(ep, path = stories_id, key = key)
 
     # Call
     story <- call_mc_api(url)
@@ -39,6 +58,50 @@ get_single_story <- function(story_id, key = NULL, tibble = TRUE) {
 
 #' Search stories
 #'
+#' Search for stories with various parameters. Multiple parameters
+#' will be connected with AND in the call.
+#'
+#' @export
+#'
+#' @param text Optional character vector for full text search passed to the
+#'   \href{https://mediacloud.org/support/query-guide/}{Solr query}.
+#'   If character vector contains more than one element, elements will
+#'   be connected with OR.
+#' @param title Optional character vector for title search passed to the
+#'   \href{https://mediacloud.org/support/query-guide/}{Solr query}.
+#'   If character vector contains more than one element, elements will
+#'   be connected with OR.
+#' @param media_id Optional media ids (see code{\link{search_media()}}) passed to the
+#'   \href{https://mediacloud.org/support/query-guide/}{Solr query}.
+#'   If vector contains more than one element, elements will
+#'   be connected with OR.
+#' @param stories_id Optional stories ids passed to the
+#'   \href{https://mediacloud.org/support/query-guide/}{Solr query}.
+#'   If vector contains more than one element, elements will
+#'   be connected with OR.
+#' @param after_date Limit results to stories published after this date. Should
+#'   be a date string that can be interpreted as a `POSIXct` object, e.g.,
+#'   '2021-01-01' or '2021-12-24 09:00:00'. Note that '00:00:00' will be
+#'   added if only passing a date.
+#' @param before_date Limit results to stories published before this date. Should
+#'   be a date string that can be interpreted as a `POSIXct` object, e.g.,
+#'   '2021-01-01' or '2021-12-24 09:00:00'. Note that '00:00:00' will be
+#'   added if only passing a date.
+#' @param n Number of stories to search. Should be <= 1000.
+#' @param last_processed_stories_id Limit results to stories with a
+#'   `processed_stories_id` greater than this value. Useful for paginating
+#'   over results.
+#' @inheritParams get_single_story
+#'
+#' @examples
+#' \dontrun{
+#' search_stories(text = c("football", "soccer"))
+#' search_stories(text = "football NOT soccer")
+#' search_stories(title = "football", media_id = c(1, 2))
+#' search_stories("football", after_date = "2020-01-01", before_date = "2020-01-02", media_id = 1)
+#' }
+#'
+#' @return A tibble containing information about the stories.
 search_stories <- function(text = NULL, title = NULL, media_id = NULL, stories_id = NULL,
                            after_date = NULL, before_date = NULL,
                            n = 20, last_processed_stories_id = NULL,
@@ -48,7 +111,7 @@ search_stories <- function(text = NULL, title = NULL, media_id = NULL, stories_i
     ep <- "stories_public/list"
 
     # Create query
-    q <- parse_solr_query(text = text, title = title,
+    q <- build_solr_query(text = text, title = title,
                           media_id = media_id, stories_id = stories_id)
 
     # Create filter query
@@ -115,6 +178,26 @@ search_stories <- function(text = NULL, title = NULL, media_id = NULL, stories_i
 
 #' Get word matrices
 #'
+#' Get word matrices for stories.
+#'
+#' @export
+#'
+#' @inheritParams search_stories
+#' @param stopword_length if set to 'tiny', 'short', or 'long',
+#'   eliminate stop word list of that length
+#'
+#' @examples
+#' \dontrun{
+#' get_word_matrices(stories_id = c(1484325770, 24835747, 24840330))
+#' get_word_matrices("football", after_date = "2020-01-01", before_date = "2020-01-02", media_id = 1)
+#' }
+#'
+#' @return A tibble with a
+#'   \href{https://cran.r-project.org/web/packages/tidytext/vignettes/tidytext.html}{Tidytext-style}
+#'   word matrix with one word per row and columns indicating
+#'   the `stories_id`, the `word_count`, the `word_stem`, and the most common
+#'   `full_word` associated with said stem. Use \code{\link[tidytext]{cast_dfm}}
+#'   to transform into a  \href{https://quanteda.io/}{Quanteda} DFM.
 get_word_matrices <- function(text = NULL, title = NULL,
                               media_id = NULL, stories_id = NULL,
                               after_date = NULL, before_date = NULL,
@@ -125,7 +208,7 @@ get_word_matrices <- function(text = NULL, title = NULL,
     ep <- "stories_public/word_matrix"
 
     # Create query
-    q <- parse_solr_query(text = text, media_id = media_id, stories_id = stories_id)
+    q <- build_solr_query(text = text, media_id = media_id, stories_id = stories_id)
 
     # Create filter query
     if (all(is.null(after_date), is.null(before_date))) {
