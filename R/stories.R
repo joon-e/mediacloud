@@ -47,8 +47,8 @@ get_single_story <- function(stories_id, key = NULL, tibble = TRUE) {
         story <- story %>%
             purrr::map_dfr(magrittr::extract, fields) %>%
             dplyr::mutate(tags = tags,
-                          publish_date = as.POSIXct(publish_date),
-                          collect_date = as.POSIXct(collect_date))
+                          publish_date = as.POSIXct(.data$publish_date),
+                          collect_date = as.POSIXct(.data$collect_date))
 
     }
 
@@ -71,7 +71,7 @@ get_single_story <- function(stories_id, key = NULL, tibble = TRUE) {
 #'   \href{https://mediacloud.org/support/query-guide/}{Solr query}.
 #'   If character vector contains more than one element, elements will
 #'   be connected with OR.
-#' @param media_id Optional media ids (see code{\link{search_media()}}) passed to the
+#' @param media_id Optional media ids (see \code{\link{search_media}}) passed to the
 #'   \href{https://mediacloud.org/support/query-guide/}{Solr query}.
 #'   If vector contains more than one element, elements will
 #'   be connected with OR.
@@ -166,8 +166,8 @@ search_stories <- function(text = NULL, title = NULL, media_id = NULL, stories_i
         stories <- stories %>%
             purrr::map_dfr(magrittr::extract, fields) %>%
             dplyr::mutate(tags = tags,
-                          publish_date = as.POSIXct(publish_date),
-                          collect_date = as.POSIXct(collect_date))
+                          publish_date = as.POSIXct(.data$publish_date),
+                          collect_date = as.POSIXct(.data$collect_date))
 
     }
 
@@ -257,19 +257,19 @@ get_word_matrices <- function(text = NULL, title = NULL,
         # Word list
         word_list <- word_list %>%
             tibble::enframe(name = "word_counts_id", value = "word_forms") %>%
-            tidyr::hoist(word_forms, word_stem = 1, full_word = 2) %>%
-            dplyr::mutate(word_counts_id = word_counts_id - 1) # R starts to count at 1
+            tidyr::hoist(.data$word_forms, word_stem = 1, full_word = 2) %>%
+            dplyr::mutate(word_counts_id = .data$word_counts_id - 1) # R starts to count at 1
 
         # Word matrix
         word_matrix <- word_matrix %>%
             tibble::enframe(name = "stories_id", value = "word_counts") %>%
-            tidyr::unnest_longer(word_counts) %>%
-            dplyr::mutate(word_counts_id = as.integer(word_counts_id))
+            tidyr::unnest_longer(.data$word_counts) %>%
+            dplyr::mutate(word_counts_id = as.integer(.data$word_counts_id))
 
         # To tibble
         wm <- word_matrix %>%
             dplyr::left_join(word_list, by = "word_counts_id") %>%
-            dplyr::select(-word_counts_id)
+            dplyr::select(-.data$word_counts_id)
 
     }
 

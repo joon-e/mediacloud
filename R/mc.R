@@ -1,3 +1,17 @@
+#' mediacloud: R wrapper package for the MediaCloud API
+#'
+#'
+#' A simple API wrapper for the MediaCloud API. Curenntly supports
+#' searching for media outlets and stories, getting word matrices for stories,
+#' getting single stories, and checking rate limits. Calls to the stories and
+#' word matrices endpoints have simplified interface for constructing the
+#' necessary Solr queries. All results follow tidy data principles.
+#'
+#' @docType package
+#' @name mediacloud
+#' @importFrom rlang .data
+NULL
+
 #' Construct request URL
 #'
 #' Construct the URL for the API call
@@ -119,9 +133,9 @@ check_rate_limit <- function(key = NULL) {
     res <- call_mc_api(url)
 
     tibble::enframe(res$limits$weekly) %>%
-        tidyr::hoist(value, "limit", "used") %>%
-        dplyr::mutate(remaining = limit - used) %>%
-        dplyr::rename(type = name, weekly_limit = limit)
+        tidyr::hoist(.data$value, "limit", "used") %>%
+        dplyr::mutate(remaining = .data$limit - .data$used) %>%
+        dplyr::rename(type = .data$name, weekly_limit = .data$limit)
 
 }
 

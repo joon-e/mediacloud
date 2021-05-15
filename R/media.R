@@ -56,7 +56,7 @@ search_media <- function(name = NULL, tag = NULL, n = 20, key = NULL, tibble = T
         media <- media %>%
             purrr::map_dfr(magrittr::extract, fields) %>%
             dplyr::mutate(tags = tags,
-                          start_date = as.POSIXct(start_date))
+                          start_date = as.POSIXct(.data$start_date))
 
     }
 
