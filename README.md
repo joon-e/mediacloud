@@ -58,11 +58,12 @@ search_media(tag = "Germany___National", n = 10)
 #> 10    39206 Tagespiegel     http://www.tagesspieg~ 2013-03-18 00:00:00 <list [2~
 ```
 
+This is mainly useful for matching media outlets with their MediaCloud
+`media_id`.
+
 ### Search stories
 
-Search for stories with `search_media()`, for example by full `text`,
-`title`, and/or `media_id`, and filter stories published after
-`after_date` and/or before `before_date`:
+Search for stories with `search_stories()`:
 
 ``` r
 stories <- search_stories(title = "dogecoin", media_id = c(19831, 38697), after_date = "2021-05-01")
@@ -77,39 +78,70 @@ stories
 #> #   tags <named list>
 ```
 
+The function provides a simplified interface for writing the [Solr
+queries](https://mediacloud.org/support/query-guide/) that MediaCloud
+parses to search for stories (`q` and `fq` parameters in the API call).
+This includes the following optional arguments:
+
+  - `text` and `title`: Character vector passed to full text search and
+    title-only search, respectively. If the character vector contains
+    more than one element, they will be connected with `OR` in the call.
+  - `media_id`: Limit to stories from media outlets with these
+    `media_id`
+  - `after_date` and `before_date`: Limit to stories published
+    after/before these dates. Should be a date string that can be
+    interpreted as a `POSIXct` object, e.g., `"2021-01-01"` or
+    `"2021-12-24 09:00:00"`. Note that `00:00:00` will be added if only
+    passing a date, but no time, and boundaries are inclusive, so
+    setting `after_date` to `"2021-01-01"` will include stories
+    published at `2021-01-01 00:00:00` and later.
+
+Use the argument `n` to control the maximum number of results returned
+with one call (`<= 1000`). Note that the returned object also includes
+the `processed_stories_id`, which can be passed to the argument
+`last_processed_stories_id` to paginate over results.
+
 ### Get word matrices
 
-Get Tidytext-style word matrices associated with those stories:
+Get [Tidytext](https://juliasilge.github.io/tidytext/)-style word
+matrices associated with those stories with `get_word_matrices()`. This
+uses the same arguments as `search_stories()`, but is most useful to
+obtain word matrices for stories found with `search_stories()`:
 
 ``` r
 wm <- get_word_matrices(stories_id = stories$stories_id)
 wm
 #> # A tibble: 290 x 4
-#>    stories_id word_counts word_stem   full_word    
-#>    <chr>            <int> <chr>       <chr>        
-#>  1 1922328226           1 parodi      parodie      
-#>  2 1922328226           1 ein         eine         
-#>  3 1922328226           2 jackson     jackson      
-#>  4 1922328226           1 coin        coin         
-#>  5 1922328226           1 bringt      bringt       
-#>  6 1922328226           2 kur         kurs         
-#>  7 1922328226           1 stand       stand        
-#>  8 1922328226           1 us-amerikan us-amerikaner
-#>  9 1922328226           6 palmer      palmer       
-#> 10 1922328226           1 dürfte      dürfte       
+#>    stories_id word_counts word_stem       full_word      
+#>    <chr>            <int> <chr>           <chr>          
+#>  1 1922328226           1 ein             eine           
+#>  2 1922328226           1 parodi          parodie        
+#>  3 1922328226           1 derzeit         derzeit        
+#>  4 1922328226           1 las             las            
+#>  5 1922328226           1 kryptowährungen kryptowährungen
+#>  6 1922328226           1 sotschi         sotschi        
+#>  7 1922328226           2 euro            euro           
+#>  8 1922328226           1 überzeugt       überzeugt      
+#>  9 1922328226           1 szene           szene          
+#> 10 1922328226           1 passiert        passiert       
 #> # ... with 280 more rows
 ```
 
-These can be tranformed to Quanteda-style DFMs using
+The word matrices can be tranformed to Quanteda-style DFMs using
 `tidytext::cast_dfm()`:
 
 ``` r
 tidytext::cast_dfm(wm, stories_id, word_stem, word_counts)
 #> Document-feature matrix of: 3 documents, 266 features (63.66% sparse) and 0 docvars.
 #>             features
-#> docs         parodi ein jackson coin bringt kur stand us-amerikan palmer dürfte
-#>   1922328226      1   1       2    1      1   2     1           1      6      1
-#>   1925893908      0   0       0    0      0   1     0           0      0      0
-#>   1926994811      0   0       0    0      0   2     0           0      0      0
+#> docs         ein parodi derzeit las kryptowährungen sotschi euro überzeugt
+#>   1922328226   1      1       1   1               1       1    2         1
+#>   1925893908   0      0       0   0               0       0    0         0
+#>   1926994811   0      0       0   0               1       0    0         0
+#>             features
+#> docs         szene passiert
+#>   1922328226     1        1
+#>   1925893908     0        0
+#>   1926994811     0        0
 #> [ reached max_nfeat ... 256 more features ]
 ```

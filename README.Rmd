@@ -52,23 +52,33 @@ Search for media outlets with `search_media()`:
 search_media(tag = "Germany___National", n = 10)
 ```
 
+This is mainly useful for matching media outlets with their MediaCloud `media_id`.
+
 ### Search stories
 
-Search for stories with `search_media()`, for example by full `text`, `title`, and/or `media_id`, and filter stories published after `after_date` and/or before `before_date`:
+Search for stories with `search_stories()`:
 
 ```{r}
 stories <- search_stories(title = "dogecoin", media_id = c(19831, 38697), after_date = "2021-05-01")
 stories
 ```
+The function provides a simplified interface for writing the [Solr queries](https://mediacloud.org/support/query-guide/) that MediaCloud parses to search for stories (`q` and `fq` parameters in the API call). This includes the following optional arguments:
+
+- `text` and `title`: Character vector passed to full text search and title-only search, respectively. If the character vector contains more than one element, they will be connected with `OR` in the call.
+- `media_id`: Limit to stories from media outlets with these `media_id`
+- `after_date` and `before_date`: Limit to stories published after/before these dates. Should be a date string that can be interpreted as a `POSIXct` object, e.g., `"2021-01-01"` or `"2021-12-24 09:00:00"`. Note that `00:00:00` will be added if only passing a date, but no time, and boundaries are inclusive, so setting `after_date` to `"2021-01-01"` will include stories published at `2021-01-01 00:00:00` and later.
+
+Use the argument `n` to control the maximum number of results returned with one call (`<= 1000`). Note that the returned object also includes the `processed_stories_id`, which can be passed to the argument `last_processed_stories_id` to paginate over results.
+
 ### Get word matrices
 
-Get Tidytext-style word matrices associated with those stories:
+Get [Tidytext](https://juliasilge.github.io/tidytext/)-style word matrices associated with those stories with `get_word_matrices()`. This uses the same arguments as `search_stories()`, but is most useful to obtain word matrices for stories found with `search_stories()`:
 
 ```{r}
 wm <- get_word_matrices(stories_id = stories$stories_id)
 wm
 ```
-These can be tranformed to Quanteda-style DFMs using `tidytext::cast_dfm()`:
+The word matrices can be tranformed to Quanteda-style DFMs using `tidytext::cast_dfm()`:
 
 ```{r}
 tidytext::cast_dfm(wm, stories_id, word_stem, word_counts)
