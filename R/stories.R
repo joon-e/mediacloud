@@ -184,6 +184,7 @@ search_stories <- function(text = NULL, title = NULL, media_id = NULL, stories_i
 #' @param split logical, either or not to split the count by `split_period`, default to TRUE
 #' @param split_period character, split the couny by this granularity, possible values are "day", "week", "month", and "year"
 #' @return depending on the parameter `tibble`, the return object can be a tibble (`tibble` is TRUE) or a list (`tibble` is FALSE).
+#' @export
 #' @examples
 #' \dontrun{
 #' ## search for daily count of articles mentioning "klimawandel" in German media
