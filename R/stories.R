@@ -175,6 +175,108 @@ search_stories <- function(text = NULL, title = NULL, media_id = NULL, stories_i
     return(stories)
 }
 
+#' Count stories and tags
+#'
+#' Search for stories with various parameters. Multiple parameters
+#' will be connected with AND in the call.
+#' `count_stories` gets the total number of stories, possibly by date. `count_tags` gets the total number of stories by \href{https://mediacloud.org/support/list-of-tags}{tags}.   
+#' @inheritParams search_stories
+#' @param split logical, either or not to split the count by `split_period`, default to TRUE
+#' @param split_period character, split the couny by this granularity, possible values are "day", "week", "month", and "year"
+#' @return depending on the parameter `tibble`, the return object can be a tibble (`tibble` is TRUE) or a list (`tibble` is FALSE).
+#' @examples
+#' \dontrun{
+#' ## search for daily count of articles mentioning "klimawandel" in German media
+#' de_media <- search_media(tag = "Germany___National")
+#' res_kw <- count_stories(text = "klimawandel", after_date = "2021-01-01",
+#' before_date = "2021-12-22", media_id = de_media$media_id,
+#' split = TRUE, split_period = "day")
+#' ## search for popular named entities in articles mentioning "covid" in German media
+#' count_tags(text = "covid", media_id = de_media$media_id, n = 100,
+#' after_date = "2020-01-01", tag_sets_id = "2389")
+#' }
+count_stories <- function(text = NULL, title = NULL, media_id = NULL,
+                          after_date = NULL, before_date = NULL,
+                          split = TRUE, split_period = "day",
+                          key = NULL, tibble = TRUE) {
+    if (isTRUE(split) & !split_period %in% c("day", "week", "month", "year")) {
+        stop("Unknown `split_period` value: possible values are \"day\", \"week\", \"month\", and \"year\".", call. = FALSE)
+    }
+    ep <- "stories_public/count"
+    q <- build_solr_query(text = text, title = title,
+                          media_id = media_id)
+    if (all(is.null(after_date), is.null(before_date))) {
+        fq <- NULL
+    } else {
+        if (is.null(after_date)) {
+        after_date <- paste(lubridate::format_ISO8601(as.POSIXct("1970-01-01")), "Z", sep = "")
+    } else {
+        after_date <- paste(lubridate::format_ISO8601(as.POSIXct(after_date)), "Z", sep = "")
+    }
+    if (is.null(before_date)) {
+        before_date <- paste(lubridate::format_ISO8601(as.POSIXct(Sys.Date())), "Z", sep = "")
+    } else {
+        before_date <- paste(lubridate::format_ISO8601(as.POSIXct(before_date)), "Z", sep = "")
+    }
+        fq <- glue::glue("publish_date:[{after_date} TO {before_date}]")
+    }
+    if (is.null(key)) key <- Sys.getenv("MEDIACLOUD_API_KEY")
+    params <- list(q = q, fq = fq, key = key)
+    if (isTRUE(split)) {
+        params[["split"]] <- "1"
+        params[["split_period"]] <- split_period
+    }
+    url <- create_mc_url(ep,
+                     parameters = params)
+    stories <- call_mc_api(url)
+    if (isTRUE(tibble)) {
+        if (split) {
+            stories <- stories$counts %>%
+                purrr::map_dfr(magrittr::extract, c("date", "count")) %>%
+                dplyr::mutate(date = as.POSIXct(.data$date))
+        } else {
+            stories <- tibble::tibble("count" = stories$count)
+        }        
+    }
+    return(stories)
+}
+
+#' @param n numeric, maximum number of tags to return
+#' @param tag_sets_id character, if not NULL, only tags belonging to this tag sets is returned. For example, the tag set id of "2389" is tag set of people as identified by the CLIFF named-entity annotator.
+#' @rdname count_stories
+#' @export
+count_tags <- function(text = NULL, title = NULL, media_id = NULL,
+                       after_date = NULL, before_date = NULL,
+                       n = 1000, tag_sets_id = NULL, key = NULL,
+                       tibble = TRUE) {
+    ep <- "stories_public/tag_count"
+    q <- build_solr_query(text = text, title = title,
+                          media_id = media_id)
+    if (all(is.null(after_date), is.null(before_date))) {
+        fq <- NULL
+    } else {
+        if (is.null(after_date)) {
+        after_date <- paste(lubridate::format_ISO8601(as.POSIXct("1970-01-01")), "Z", sep = "")
+    } else {
+        after_date <- paste(lubridate::format_ISO8601(as.POSIXct(after_date)), "Z", sep = "")
+    }
+    if (is.null(before_date)) {
+        before_date <- paste(lubridate::format_ISO8601(as.POSIXct(Sys.Date())), "Z", sep = "")
+    } else {
+        before_date <- paste(lubridate::format_ISO8601(as.POSIXct(before_date)), "Z", sep = "")
+    }
+        fq <- glue::glue("publish_date:[{after_date} TO {before_date}]")
+    }
+    if (is.null(key)) key <- Sys.getenv("MEDIACLOUD_API_KEY")
+    params <- list(q = q, fq = fq, key = key, limit = n, tag_sets_id = tag_sets_id)
+    url <- create_mc_url(ep,
+                     parameters = params)
+    stories <- call_mc_api(url)
+    if (isTRUE(tibble)) {
+        stories <- stories %>% purrr::map_dfr(magrittr::extract, c("tags_id", "count", "tag", "tag_set_label", "tag_set_name", "tag_sets_id")) %>% dplyr::arrange(dplyr::desc(.data$count))
+    }
+    return(stories)
+}
 
 #' Get word matrices
 #'
