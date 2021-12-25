@@ -19,7 +19,8 @@ Description: A simple API wrapper for the MediaCloud API. Curenntly supports
   necessary Solr queries. All results follow tidy data principles.
 License: MIT + file LICENSE
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    httptest
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
