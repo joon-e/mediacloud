@@ -1,0 +1,23 @@
+## require(httptest)
+## start_capturing()
+## de_media <- search_media(tag = "Germany___National")
+## spiegel <- search_media(name = "spiegel")
+## stop_capturing()
+
+with_mock_api({
+    test_that("search_media", {
+        skip_if(!dir.exists("api.mediacloud.org"))
+        expect_error(search_media(tag = "Germany", n = 200))
+        expect_error(de_media <- search_media(tag = "Germany___National"), NA)
+        expect_error(spiegel <- search_media(name = "spiegel"), NA)
+        expect_true(nrow(de_media) == 20)
+        expect_true(nrow(spiegel) == 2)
+        expect_true("tbl_df" %in% class(de_media))
+        expect_true("tbl_df" %in% class(spiegel))
+        expect_error(de_media <- search_media(tag = "Germany___National", tibble = FALSE), NA)
+        expect_error(spiegel <- search_media(name = "spiegel", tibble = FALSE), NA)
+        expect_false("tbl_df" %in% class(de_media))
+        expect_false("tbl_df" %in% class(spiegel))
+        expect_true(length(de_media) > length(spiegel))
+    })
+})
