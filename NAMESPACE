@@ -2,6 +2,8 @@
 
 export("%>%")
 export(check_rate_limit)
+export(count_stories)
+export(count_tags)
 export(get_single_story)
 export(get_word_matrices)
 export(search_media)

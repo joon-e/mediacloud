@@ -2,11 +2,16 @@ Package: mediacloud
 Title: MediaCloud API Wrapper
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "julian",
+    c(person(given = "julian",
            family = "Unkel",
            role = c("aut", "cre"),
            email = "julian.unkel@gmail.com",
-           comment = c(ORCID = "0000-0001-9568-7041"))
+           comment = c(ORCID = "0000-0001-9568-7041")),
+    person(given = "Chung-hong",
+           family = "Chan",
+           role = c("ctb"),
+           email = "chainsawtiney@gmail.com",
+           comment = c(ORCID = "0000-0002-6232-7530")))
 Description: A simple API wrapper for the MediaCloud API. Curenntly supports
   searching for media outlets and stories, getting word matrices for stories,
   getting single stories, and checking rate limits. Calls to the stories and
@@ -14,12 +19,13 @@ Description: A simple API wrapper for the MediaCloud API. Curenntly supports
   necessary Solr queries. All results follow tidy data principles.
 License: MIT + file LICENSE
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    httptest
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Imports: 
     httr,
     stringr,
